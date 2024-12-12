@@ -1,11 +1,12 @@
 const express = require('express');
 const app = express();
-const { connectDB } = require("./database");
+const { connectDB } = require("./config/database");
 const User = require('./models/UserModel'); // Fix: Capitalize User as it's a model
-import validator from 'validator';
 
 // Middleware to parse JSON
 app.use(express.json());
+
+
 
 connectDB().then(() => {
     console.log("Connected to MongoDB");
@@ -16,21 +17,39 @@ connectDB().then(() => {
     console.error("Database cannot be connected", err); // Fix: Add error logging
 });
 
-app.get("/signup", async (req, res) => {
-            
-    const {name , email, password} = req.body;
+app.post("/signup", async (req, res) => {
+
+    const data = new User({
+        firstName: "Yogesh",
+        lastName: "Aithani",
+        emailId: "yogeshaithani@gmail.com",
+        password: "Yogesh@321"
+    })
 
     try {
-        if(!name || !email || !password){
-            res.send("All fields are required");
-        }
-
-        const existingUser = await User.findOne({email});
-        if(existingUser){
-            return res.send("User already registered")
-        }
-    } catch (error) {
-        
+        await data.save();
+        res.send("Data saved successfully")
+    } catch (err) {
+        console.log("Something went wrong");
+        res.send(err.message)
     }
 })
+
+app.get("/user", async (req, res) => {
+    const userEmail = req.body.emailId; // Ensure this is sent in the request body
+    try {
+        const user = await User.findOne({ emailId: userEmail }); // Find one user with the given emailId
+
+        if (!user) { // If user is null, no match was found
+            res.status(404).send("User not found");
+        } else {
+            res.status(200).send(user); // Return the found user
+        }
+
+    } catch (err) {
+        console.error("Error occurred:", err.message); // Log the error for debugging
+        res.status(500).send("Something went wrong");
+    }
+});
+
 
