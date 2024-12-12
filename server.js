@@ -19,19 +19,15 @@ connectDB().then(() => {
 
 app.post("/signup", async (req, res) => {
 
-    const data = new User({
-        firstName: "Yogesh",
-        lastName: "Aithani",
-        emailId: "yogeshaithani@gmail.com",
-        password: "Yogesh@321"
-    })
 
-    try {
+    const data = new User(req.body)
+
+    try{
         await data.save();
         res.send("Data saved successfully")
-    } catch (err) {
+    }catch(err){
         console.log("Something went wrong");
-        res.send(err.message)
+        res.send(err.me)
     }
 })
 
